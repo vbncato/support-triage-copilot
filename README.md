@@ -1,6 +1,6 @@
 # Support Triage Copilot
 
-> **Status: a live LLM run has not been performed yet.** Everything shown here (screenshot, demo, evaluation report) runs in demo mode with recorded synthetic model responses. The live Anthropic adapter is tested only against a local fake server, and LLM quality metrics are empty. See [Verification status](#verification-status).
+> **Status: a live LLM run has not been performed yet.** The screenshot and demo use recorded synthetic model responses. In the evaluation report, retrieval and the keyword baseline are real measurements, while the "model" columns come from a label-echo stand-in and are not model metrics. The live Anthropic adapter is tested only against a local fake server, and LLM quality metrics are empty. See [Verification status](#verification-status).
 
 A portfolio project that models technical support for a small B2B SaaS with a REST API. The product, its documentation, the tickets, names and IDs are all synthetic. "Fernwick" is a fictional invoicing API, and `*.example` domains are reserved.
 
