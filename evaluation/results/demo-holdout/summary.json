@@ -1,0 +1,90 @@
+{
+  "meta": {
+    "run": "demo-holdout",
+    "mode": "demo",
+    "model": "demo-mechanics-label-echo",
+    "split": "holdout",
+    "cases": 12,
+    "started_at_utc": "2026-11-27T00:01:50+00:00",
+    "config_hash": "17972bad6e92",
+    "top_k": 4,
+    "min_terms": 2,
+    "effort": "n/a",
+    "injected_faults": {
+      "ho-03": "wrong_category",
+      "ho-06": "invented_source",
+      "ho-09": "wrong_disposition",
+      "ho-12": "missing_draft"
+    }
+  },
+  "metrics": {
+    "retrieval_hit_at_k": {
+      "num": 10,
+      "den": 12,
+      "pct": 83.3
+    },
+    "retrieval_hit_at_1": {
+      "num": 8,
+      "den": 12,
+      "pct": 66.7
+    },
+    "retrieval_no_sections": {
+      "num": 0,
+      "den": 12,
+      "pct": 0.0
+    },
+    "baseline_routing": {
+      "num": 11,
+      "den": 12,
+      "pct": 91.7
+    },
+    "model_routing": {
+      "num": 11,
+      "den": 12,
+      "pct": 91.7
+    },
+    "routing_comparison": {
+      "both_correct": 10,
+      "only_baseline": 1,
+      "only_model": 1
+    },
+    "model_disposition": {
+      "num": 10,
+      "den": 12,
+      "pct": 83.3
+    },
+    "model_valid_source_ids": {
+      "num": 10,
+      "den": 11,
+      "pct": 90.9
+    },
+    "drafts_with_relevant_source": {
+      "num": 8,
+      "den": 8,
+      "pct": 100.0
+    },
+    "manual_review_recall": {
+      "num": 3,
+      "den": 3,
+      "pct": 100.0
+    },
+    "manual_review_unneeded": {
+      "num": 0,
+      "den": 9,
+      "pct": 0.0
+    },
+    "decided_by_rule": {
+      "num": 0,
+      "den": 12,
+      "pct": 0.0
+    },
+    "failed_attempts": {
+      "num": 1,
+      "den": 12,
+      "pct": 8.3
+    },
+    "error_types": {
+      "CONTRACT_VIOLATION": 1
+    }
+  }
+}

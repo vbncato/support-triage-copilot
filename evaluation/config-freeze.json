@@ -1,0 +1,8 @@
+{
+  "frozen_at_utc": "2026-11-27T00:01:47Z",
+  "config_hash": "17972bad6e92",
+  "covers": "system prompt, output schema, model id, effort, max_tokens, retrieval top_k/min_terms/max_chars, KB content hashes, baseline keywords",
+  "tuned_on": "dev split only (retrieval rule, KB wording, baseline keywords). The prompt was not tuned against a live model.",
+  "note": "Recorded before the first holdout run. Any later change to these settings produces a new hash; a holdout run with a different hash is not an independent check.",
+  "evidence": "frozen_at_utc is the file's write time (mtime). The dev run with this hash started 00:01:31Z; the first holdout run started 00:01:50Z (evaluation/results/demo-holdout/summary.json). Later holdout re-runs used the same hash and only confirmed identical numbers."
+}

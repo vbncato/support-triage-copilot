@@ -1,0 +1,140 @@
+[
+  {
+    "ticket": "DEMO-001",
+    "note": "Synthetic, hand-written. Expected good behaviour for a 401 token_expired ticket.",
+    "steps": [
+      {
+        "delay_seconds": 0.6,
+        "output": {
+          "disposition": "DRAFT_REPLY",
+          "category": "AUTHENTICATION",
+          "draft_reply": "Hi Dana,\n\nthanks for the details. A 401 with error.code token_expired means the access token was valid but has reached the end of its lifetime. Fernwick access tokens expire 60 minutes after they are issued, so a worker that fetches a token only once at startup will start failing about an hour later.\n\nTo fix this, cache the token and refresh it about 5 minutes before expires_in runs out. If a call still returns 401 with token_expired, refresh once and retry that call once, rather than retrying in a loop.\n\nBest regards,\nFernwick Support",
+          "source_ids": ["kb-auth-401", "kb-auth-token-lifecycle"],
+          "requested_details": [],
+          "reason": "Customer reports 401 token_expired with a token fetched once at startup; the auth sections explain the 60-minute lifetime and refresh behaviour."
+        }
+      }
+    ]
+  },
+  {
+    "ticket": "DEMO-002",
+    "note": "Synthetic. Ambiguous ticket without status code or IDs.",
+    "steps": [
+      {
+        "delay_seconds": 0.6,
+        "output": {
+          "disposition": "NEEDS_INFO",
+          "category": "OTHER",
+          "draft_reply": "Hi Marco,\n\nsorry to hear the integration is failing. To find the failing requests in our logs, could you send us:\n\n- the X-Request-Id header of one failing request,\n- the approximate UTC time of the failure,\n- the HTTP status code and the endpoint you called,\n- the error.code from the response body.\n\nPlease do not send API keys or tokens; we do not need them.\n\nBest regards,\nFernwick Support",
+          "source_ids": ["kb-diagnostic-details"],
+          "requested_details": ["request_id", "timestamp", "http_status_code", "endpoint", "error_response_body"],
+          "reason": "The ticket gives no status code, endpoint or request ID, so the cause cannot be identified; ask for the details listed in the diagnostics section."
+        }
+      }
+    ]
+  },
+  {
+    "ticket": "DEMO-003",
+    "note": "Synthetic. Billing request outside the knowledge base.",
+    "steps": [
+      {
+        "delay_seconds": 0.5,
+        "output": {
+          "disposition": "MANUAL_REVIEW",
+          "category": "OTHER",
+          "draft_reply": null,
+          "source_ids": ["kb-escalation-manual-review"],
+          "requested_details": [],
+          "reason": "Billing change and invoice reissue for the Fernwick subscription; the knowledge base says billing requests go to manual review."
+        }
+      }
+    ]
+  },
+  {
+    "ticket": "DEMO-004",
+    "note": "Synthetic, deliberately broken: cites kb-rate-limits-advanced, which does not exist and was not given to the model. The validator must reject it.",
+    "steps": [
+      {
+        "delay_seconds": 0.5,
+        "output": {
+          "disposition": "DRAFT_REPLY",
+          "category": "RATE_LIMIT",
+          "draft_reply": "Hi Jonas,\n\nyour import exceeds the workspace rate limit. Wait for the number of seconds in the Retry-After header before retrying, and see our advanced rate limit guide for batch imports.\n\nBest regards,\nFernwick Support",
+          "source_ids": ["kb-rate-limit-429", "kb-rate-limits-advanced"],
+          "requested_details": [],
+          "reason": "429 during a bulk import with immediate retries."
+        }
+      }
+    ]
+  },
+  {
+    "ticket": "DEMO-005",
+    "note": "Synthetic. Attempt 1 simulates a provider timeout; attempt 2 returns a draft.",
+    "steps": [
+      {"delay_seconds": 1.0, "error": "TIMEOUT", "detail": "Simulated: the model did not answer within the timeout (demo)"},
+      {
+        "delay_seconds": 0.6,
+        "output": {
+          "disposition": "DRAFT_REPLY",
+          "category": "WEBHOOK_DELIVERY",
+          "draft_reply": "Hi Aiko,\n\nthanks for the event ID. A webhook delivery only counts as successful when your endpoint returns a 2xx status within 10 seconds. Because your endpoint looks up the invoice before responding, which takes 15-20 seconds, deliveries time out and are treated as failed.\n\nPlease have the endpoint respond with 2xx first and process the event afterwards. Failed deliveries are retried with backoff for up to 72 hours, and you can replay events from the last 30 days from Dashboard > Developers > Webhooks > Delivery log. Events may arrive more than once, so deduplicate by event ID.\n\nBest regards,\nFernwick Support",
+          "source_ids": ["kb-webhook-delivery", "kb-webhook-retries"],
+          "requested_details": [],
+          "reason": "Endpoint does slow work before responding, which exceeds the 10-second delivery timeout described in the webhook checklist."
+        }
+      }
+    ]
+  },
+  {
+    "ticket": "DEMO-006",
+    "note": "Synthetic. Expected behaviour when ticket text tries to instruct the system.",
+    "steps": [
+      {
+        "delay_seconds": 0.5,
+        "output": {
+          "disposition": "MANUAL_REVIEW",
+          "category": "PROCESSING_DELAY",
+          "draft_reply": null,
+          "source_ids": ["kb-escalation-manual-review"],
+          "requested_details": [],
+          "reason": "The ticket contains instructions aimed at the support system and asks for another workspace's API keys; it must be handled by a person."
+        }
+      }
+    ]
+  },
+  {
+    "ticket": "DEMO-007",
+    "note": "Synthetic. Attempt 1 is slower than any sane timeout (used to test crash recovery); attempt 2 answers.",
+    "steps": [
+      {"delay_seconds": 600, "error": "TIMEOUT"},
+      {
+        "delay_seconds": 0.5,
+        "output": {
+          "disposition": "MANUAL_REVIEW",
+          "category": "PROCESSING_DELAY",
+          "draft_reply": null,
+          "source_ids": ["kb-processing-delay"],
+          "requested_details": [],
+          "reason": "The export has been queued for more than 2 hours; the processing-delay section says such jobs go to manual review by the data-pipeline team."
+        }
+      }
+    ]
+  },
+  {
+    "ticket": "DEMO-008",
+    "note": "Synthetic. 403 insufficient_scope.",
+    "steps": [
+      {
+        "delay_seconds": 0.6,
+        "output": {
+          "disposition": "DRAFT_REPLY",
+          "category": "PERMISSIONS",
+          "draft_reply": "Hi Tom,\n\na 403 means the request was authenticated, but the API key is not allowed to perform this action, which is why refreshing the token did not help. The error.code insufficient_scope with required_scope invoices:write means the key is missing the invoices:write scope that POST /v1/invoices needs.\n\nA workspace admin can add this scope to the key in Dashboard > Developers > API keys. After that, creating invoices with the same key should work.\n\nBest regards,\nFernwick Support",
+          "source_ids": ["kb-permissions-403", "kb-api-key-scopes"],
+          "requested_details": [],
+          "reason": "403 insufficient_scope with the missing scope named in the response; the permissions section explains how an admin adds the scope."
+        }
+      }
+    ]
+  }
+]

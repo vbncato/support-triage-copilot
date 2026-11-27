@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Queue · Support Triage Copilot{% endblock %}
+{% block content %}
+<div class="queue-head">
+  <h1>Ticket queue</h1>
+  <form class="filter" method="get" action="/">
+    <label for="status">Status</label>
+    <select id="status" name="status" onchange="this.form.submit()">
+      <option value="">All</option>
+      {% for s in statuses %}<option value="{{ s }}" {% if s == status %}selected{% endif %}>{{ s }}</option>{% endfor %}
+    </select>
+  </form>
+</div>
+{% if not rows %}
+  <p class="muted">No tickets{% if status %} with status {{ status }}{% endif %}. Create one with <code>POST /api/tickets</code>.</p>
+{% else %}
+<table class="queue">
+  <thead><tr><th>ID</th><th>Subject</th><th>Status</th><th>Category</th><th>Queue</th><th>Updated</th></tr></thead>
+  <tbody>
+  {% for r in rows %}
+    <tr>
+      <td class="mono"><a href="/tickets/{{ r.id }}">#{{ r.id }}</a>{% if r.external_id %}<div class="muted small">{{ r.external_id }}</div>{% endif %}</td>
+      <td><a href="/tickets/{{ r.id }}">{{ r.subject }}</a></td>
+      <td><span class="status status-{{ r.status|lower }}">{{ r.status }}</span></td>
+      <td>{{ r.category or "—" }}</td>
+      <td>{{ r.queue or "—" }}</td>
+      <td class="muted small">{{ r.updated_at.strftime("%Y-%m-%d %H:%M:%S UTC") }}</td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endif %}
+{% endblock %}

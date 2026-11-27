@@ -1,0 +1,8 @@
+# Direct runtime dependencies, pinned to the versions the project was run with.
+# Full resolved set (including transitive packages): requirements.lock
+fastapi==0.165.0
+uvicorn==0.54.0
+jinja2==3.1.6
+psycopg[binary]==3.3.9
+psycopg-pool==3.3.3
+anthropic==2.14.0

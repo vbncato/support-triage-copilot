@@ -1,0 +1,3 @@
+# Test dependencies (installed in the same image so tests run inside Compose).
+pytest==9.2.0
+httpx==0.29.0

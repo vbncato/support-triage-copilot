@@ -1,0 +1,91 @@
+{
+  "meta": {
+    "run": "demo-dev",
+    "mode": "demo",
+    "model": "demo-mechanics-label-echo",
+    "split": "dev",
+    "cases": 18,
+    "started_at_utc": "2026-11-27T00:01:31+00:00",
+    "config_hash": "17972bad6e92",
+    "top_k": 4,
+    "min_terms": 2,
+    "effort": "n/a",
+    "injected_faults": {
+      "dev-03": "wrong_category",
+      "dev-06": "invented_source",
+      "dev-09": "wrong_disposition",
+      "dev-12": "missing_draft",
+      "dev-15": "wrong_category",
+      "dev-18": "invented_source"
+    }
+  },
+  "metrics": {
+    "retrieval_hit_at_k": {
+      "num": 18,
+      "den": 18,
+      "pct": 100.0
+    },
+    "retrieval_hit_at_1": {
+      "num": 14,
+      "den": 18,
+      "pct": 77.8
+    },
+    "retrieval_no_sections": {
+      "num": 0,
+      "den": 18,
+      "pct": 0.0
+    },
+    "baseline_routing": {
+      "num": 17,
+      "den": 17,
+      "pct": 100.0
+    },
+    "model_routing": {
+      "num": 13,
+      "den": 17,
+      "pct": 76.5
+    },
+    "routing_comparison": {
+      "both_correct": 13,
+      "only_baseline": 4
+    },
+    "model_disposition": {
+      "num": 14,
+      "den": 18,
+      "pct": 77.8
+    },
+    "model_valid_source_ids": {
+      "num": 18,
+      "den": 20,
+      "pct": 90.0
+    },
+    "drafts_with_relevant_source": {
+      "num": 13,
+      "den": 13,
+      "pct": 100.0
+    },
+    "manual_review_recall": {
+      "num": 2,
+      "den": 5,
+      "pct": 40.0
+    },
+    "manual_review_unneeded": {
+      "num": 0,
+      "den": 13,
+      "pct": 0.0
+    },
+    "decided_by_rule": {
+      "num": 0,
+      "den": 18,
+      "pct": 0.0
+    },
+    "failed_attempts": {
+      "num": 3,
+      "den": 18,
+      "pct": 16.7
+    },
+    "error_types": {
+      "CONTRACT_VIOLATION": 3
+    }
+  }
+}

@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}{{ s.title }} · Knowledge base{% endblock %}
+{% block content %}
+<article class="kb-article">
+  <p class="muted small">Knowledge base · <span class="mono">{{ s.id }}</span></p>
+  <h1>{{ s.title }}</h1>
+  {% if s.tags %}<p class="tags">{% for t in s.tags %}<span class="chip">{{ t }}</span>{% endfor %}</p>{% endif %}
+  <pre class="kb-body">{{ s.body }}</pre>
+  <p class="muted small">Updated {{ s.updated_at.strftime("%Y-%m-%d %H:%M UTC") }} · synthetic documentation for a fictional product</p>
+  <p><a href="javascript:history.back()">← Back</a></p>
+</article>
+{% endblock %}

@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+{% set t = d.ticket %}
+{% set a = d.current_attempt %}
+{% set p = a.proposal if a and a.proposal else none %}
+{% set valid = a and a.state == "SUCCEEDED" and not a.validation_errors %}
+{% block title %}#{{ t.id }} {{ t.subject }} · Support Triage Copilot{% endblock %}
+{% block content %}
+<div id="ticket-root" class="ticket-grid"
+     data-ticket-id="{{ t.id }}" data-version="{{ t.version }}" data-status="{{ t.status }}"
+     data-attempt-id="{{ a.id if a else '' }}"
+     data-original-draft="{{ p.draft_reply if (valid and p and p.draft_reply) else '' }}">
+
+  <section class="pane ticket-pane" aria-labelledby="ticket-subject">
+    <p class="muted small"><a href="/">← Queue</a></p>
+    <p class="meta">
+      <span class="mono">Ticket #{{ t.id }}</span>
+      {% if t.external_id %}<span class="mono muted">· {{ t.external_id }}</span>{% endif %}
+      <span class="muted">· created {{ t.created_at.strftime("%Y-%m-%d %H:%M:%S UTC") }}</span>
+    </p>
+    <h1 id="ticket-subject">{{ t.subject }}</h1>
+    <p><span class="status status-{{ t.status|lower }}" id="ticket-status">{{ t.status }}</span>
+       <span class="muted small">version {{ t.version }}</span></p>
+    <h2 class="label">Customer message</h2>
+    <pre class="ticket-body">{{ t.body }}</pre>
+
+    <h2 class="label">History</h2>
+    <ol class="history">
+      {% for e in d.events %}
+        <li>
+          <span class="muted small">{{ e.created_at.strftime("%m-%d %H:%M:%S") }}</span>
+          <span class="actor actor-{{ e.actor }}">{{ e.actor }}</span>
+          <strong>{{ e.action|replace("_", " ")|lower }}</strong>
+          {% if e.from_status != e.to_status and e.to_status %}<span class="muted">{{ e.from_status or "" }} → {{ e.to_status }}</span>{% endif %}
+          {% if e.detail.error_type %}<span class="muted">({{ e.detail.error_type }})</span>{% endif %}
+          {% if e.detail.outcome %}<span class="muted">({{ e.detail.outcome }})</span>{% endif %}
+          {% if e.detail.note %}<div class="muted small">Note: {{ e.detail.note }}</div>{% endif %}
+        </li>
+      {% endfor %}
+    </ol>
+  </section>
+
+  <section class="pane review-pane" aria-label="Recommendation and decision">
+    <div id="notice" class="notice" role="alert" hidden></div>
+
+    {% if d.decision %}
+      <div class="card decision">
+        <h2>Final decision</h2>
+        <p class="muted small">{{ d.decision.action|replace("_", " ")|lower }}{% if d.decision.edited %} · text edited by operator{% endif %}
+          · {{ d.decision.decided_at.strftime("%Y-%m-%d %H:%M:%S UTC") }}</p>
+        <pre class="final-text">{{ d.decision.final_text }}</pre>
+        <p class="muted small">Saved in the application. Sending to the customer is out of scope for this version.</p>
+      </div>
+    {% endif %}
+
+    <div class="card">
+      <div class="card-head">
+        <h2>Recommendation</h2>
+        {% if a %}<span class="muted small">attempt {{ a.attempt_no }} · {{ a.mode }} · {{ a.model }}</span>{% endif %}
+      </div>
+
+      {% if not a %}
+        <p class="muted">Not analysed yet.</p>
+      {% elif a.state == "RUNNING" %}
+        <p class="waiting"><span class="spinner" aria-hidden="true"></span>Analysis running since {{ a.started_at.strftime("%H:%M:%S") }} UTC.
+          If no result arrives by {{ a.deadline_at.strftime("%H:%M:%S") }} UTC the attempt expires and you can retry. You can route to manual review now.</p>
+      {% elif not valid %}
+        <div class="error-box">
+          <strong>{{ a.error_type or "FAILED" }}</strong> — {{ error_types.get(a.error_type, "Analysis failed.") }}
+          {% if a.error_detail %}<div class="small">{{ a.error_detail }}</div>{% endif %}
+          {% if a.validation_errors %}
+            <ul class="small">{% for v in a.validation_errors %}<li><span class="mono">{{ v.code }}</span>: {{ v.message }}</li>{% endfor %}</ul>
+          {% endif %}
+          <div class="small">The ticket is safe. Re-run the analysis, write your own reply below, or route it to manual review.</div>
+        </div>
+        {% if a.raw_output %}<details class="small"><summary>Rejected model output</summary><pre>{{ a.raw_output }}</pre></details>{% endif %}
+      {% endif %}
+
+      {% if valid and p %}
+        <dl class="proposal">
+          <dt>Suggested action</dt><dd><span class="disp disp-{{ p.disposition|lower }}">{{ p.disposition|replace("_", " ") }}</span>
+            {% if a.decided_by == "rule" %}<span class="muted small">(application rule, model not called)</span>{% endif %}</dd>
+          <dt>Category → queue</dt><dd>{{ p.category }} → <span class="mono">{{ p.queue }}</span></dd>
+          <dt>Why</dt><dd>{{ p.reason }}</dd>
+          {% if p.requested_details %}
+            <dt>Ask the customer for</dt><dd>{% for x in p.requested_details %}<span class="chip">{{ x }}</span>{% endfor %}</dd>
+          {% endif %}
+        </dl>
+      {% endif %}
+
+      {% if d.actions.edit_approve %}
+        <label class="label" for="draft">
+          {% if valid and p and p.draft_reply %}Draft reply (editable){% else %}Your reply (no draft prepared){% endif %}
+        </label>
+        <textarea id="draft" rows="11" maxlength="5000">{{ p.draft_reply if (valid and p and p.draft_reply) else "" }}</textarea>
+      {% endif %}
+
+      <div class="actions">
+        {% if d.actions.approve %}
+          <button type="button" class="btn primary" id="btn-approve">Approve draft</button>
+        {% endif %}
+        {% if d.actions.edit_approve %}
+          <button type="button" class="btn" id="btn-edit-approve" {% if d.actions.approve %}disabled{% endif %}>Save edited text &amp; approve</button>
+        {% endif %}
+        {% if d.actions.route_manual %}
+          <button type="button" class="btn warn" id="btn-manual">Route to manual review</button>
+        {% endif %}
+        {% if d.actions.analyze %}
+          <button type="button" class="btn" id="btn-analyze">{% if a %}Re-run analysis{% else %}Run analysis{% endif %}</button>
+        {% endif %}
+      </div>
+      {% if d.actions.route_manual %}
+        <input type="text" id="manual-note" class="note-input" maxlength="500"
+               placeholder="Optional note for manual review" aria-label="Optional note for manual review">
+      {% endif %}
+      <p id="busy" class="waiting" hidden><span class="spinner" aria-hidden="true"></span><span id="busy-text">Working…</span></p>
+    </div>
+
+    <div class="card">
+      <h2>Sources given to the model</h2>
+      {% if a and a.sources %}
+        <p class="muted small">Retrieved by PostgreSQL full-text search. “Cited” means the model listed the section; check that the draft actually matches it.</p>
+        <ul class="sources">
+        {% for s in a.sources %}
+          <li class="{% if s.cited %}cited{% endif %}">
+            <details {% if s.cited %}open{% endif %}>
+              <summary><span class="mono small">{{ s.id }}</span> {{ s.title }}
+                {% if s.cited %}<span class="chip chip-cited">cited</span>{% endif %}
+                <span class="muted small">rank {{ "%.3f"|format(s.rank) }}</span></summary>
+              <pre class="kb-body">{{ s.body }}</pre>
+              <a href="{{ s.url }}" target="_blank" rel="noopener">Open section</a>
+            </details>
+          </li>
+        {% endfor %}
+        </ul>
+      {% elif a %}
+        <p class="muted">No section matched this ticket.</p>
+      {% else %}
+        <p class="muted">Run the analysis to retrieve sources.</p>
+      {% endif %}
+      {% if a and a.invalid_citations %}
+        <p class="error-box small">Rejected citations (not given to the model): {% for x in a.invalid_citations %}<span class="mono">{{ x }}</span> {% endfor %}</p>
+      {% endif %}
+    </div>
+
+    {% if d.attempts %}
+    <details class="card small">
+      <summary>All analysis attempts ({{ d.attempts|length }})</summary>
+      <table class="attempts">
+        <thead><tr><th>#</th><th>State</th><th>Outcome / error</th><th>Mode</th><th>Started</th></tr></thead>
+        <tbody>{% for x in d.attempts %}
+          <tr><td>{{ x.attempt_no }}</td><td>{{ x.state }}{% if x.late %} · late result ignored{% endif %}</td>
+              <td>{{ x.outcome or x.error_type or "—" }}</td><td>{{ x.mode }}</td>
+              <td>{{ x.started_at.strftime("%H:%M:%S") }}</td></tr>
+        {% endfor %}</tbody>
+      </table>
+    </details>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}
+{% block scripts %}<script src="/static/app.js?v={{ asset_version }}"></script>{% endblock %}

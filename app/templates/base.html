@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Support Triage Copilot{% endblock %}</title>
+  <link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/static/app.css?v={{ asset_version }}">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/">Support Triage Copilot</a>
+    <nav><a href="/">Queue</a><a href="/docs">API docs</a></nav>
+    {% if mode == "demo" %}
+      <span class="mode mode-demo" title="Model responses are recorded synthetic examples, not live model output">DEMO MODE · recorded synthetic model responses</span>
+    {% else %}
+      <span class="mode mode-live">LIVE MODE · {{ model }}</span>
+    {% endif %}
+  </header>
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,11 @@
+.env
+.env.*
+!.env.example
+.venv/
+__pycache__/
+.pytest_cache/
+*.pyc
+*.zip
+# Scratch evaluation runs; the runs referenced in docs/evaluation.md are kept (see that file).
+evaluation/results/scratch-*
+.playwright-mcp/
